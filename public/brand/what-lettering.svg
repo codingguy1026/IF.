@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" role="img" aria-labelledby="title">
+  <title id="title">WHAT custom lettering</title>
+  <g fill="#000">
+    <!-- W -->
+    <path d="M71 299h165v241h34V299h165v241h34V299h165v406H71z"/>
+    <!-- H -->
+    <path d="M668 301h161v121h35V301h161v404H864V584h-35v121H668z"/>
+    <!-- A -->
+    <path fill-rule="evenodd" d="M1060 301h395v404h-157v-52h-82v52h-156zm156 157v38h82v-38z"/>
+    <!-- T -->
+    <path d="M1490 301h376v121h-128v283h-121V422h-127z"/>
+  </g>
+</svg>

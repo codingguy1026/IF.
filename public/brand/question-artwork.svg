@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" role="img" aria-labelledby="title">
+  <title id="title">Ellipsis and question mark custom artwork</title>
+  <g fill="#000">
+    <path d="M1058 108h450v211h-366v183h237v183h-237V319h-84z"/>
+    <path d="M108 716h237v236H108zM453 716h237v236H453zM798 716h236v236H798zM1143 716h236v236h-236z"/>
+  </g>
+</svg>
