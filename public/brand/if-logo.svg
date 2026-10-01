@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" role="img" aria-labelledby="title">
+  <title id="title">IF.</title>
+  <g fill="#000">
+    <path d="M92 132h174v548H92z"/>
+    <path d="M330 132h416v153H504v72h208v153H504v170H330z"/>
+    <path d="M772 506h158v174H772z"/>
+  </g>
+</svg>
