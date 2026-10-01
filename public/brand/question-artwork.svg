@@ -1,7 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" role="img" aria-labelledby="title">
-  <title id="title">Ellipsis and question mark custom artwork</title>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" role="img" aria-labelledby="question-title question-description">
+  <title id="question-title">Ellipsis and question mark</title>
+  <desc id="question-description">The supplied geometric artwork, faithfully traced as transparent vector shapes.</desc>
   <g fill="#000">
-    <path d="M1058 108h450v211h-366v183h237v183h-237V319h-84z"/>
-    <path d="M108 716h237v236H108zM453 716h237v236H453zM798 716h236v236H798zM1143 716h236v236h-236z"/>
+    <g id="ellipsis">
+      <rect x="108" y="716" width="237" height="236"/>
+      <rect x="453" y="716" width="237" height="236"/>
+      <rect x="798" y="716" width="236" height="236"/>
+    </g>
+    <g id="question-mark">
+      <rect x="1058" y="108" width="450" height="181"/>
+      <rect x="1325" y="108" width="184" height="394"/>
+      <rect x="1142" y="319" width="237" height="367"/>
+      <rect x="1143" y="716" width="236" height="236"/>
+    </g>
   </g>
 </svg>
