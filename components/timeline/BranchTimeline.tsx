@@ -2,8 +2,9 @@
 import { Maximize2, Minus, Plus, RotateCcw } from "lucide-react";
 import { useState } from "react";
 import { timeline } from "@/lib/data";
+import Link from "next/link";
 
-export function BranchTimeline() {
+export function BranchTimeline({worldId="luna-republic"}:{worldId?:string}) {
  const [zoom,setZoom]=useState(1); const [offset,setOffset]=useState({x:0,y:0}); const [selected,setSelected]=useState(timeline[2]);
  return <div className="timeline-panel">
   <div className="timeline-head"><div><span className="status-dot"/> MAIN WORLDLINE</div><div className="timeline-tools"><button onClick={()=>setZoom(v=>Math.max(.7,v-.15))} aria-label="Zoom out"><Minus/></button><button onClick={()=>setZoom(v=>Math.min(1.6,v+.15))} aria-label="Zoom in"><Plus/></button><button onClick={()=>{setZoom(1);setOffset({x:0,y:0})}} aria-label="Reset view"><RotateCcw/></button><button aria-label="Fit view"><Maximize2/></button></div></div>
@@ -15,6 +16,6 @@ export function BranchTimeline() {
     </g>)}
    </svg>
   </div>
-  <div className="event-inspector"><div><span>{selected.year}</span><h3>{selected.title}</h3><p>{selected.text}</p></div><button>Fork from here <span>↗</span></button></div>
+  <div className="event-inspector"><div><span>{selected.year}</span><h3>{selected.title}</h3><p>{selected.text}</p>{selected.articleIds.length>0&&<div className="event-records"><b>LINKED WIKI</b>{selected.articleIds.map(id=><Link key={id} href={`/world/${worldId}/wiki/${id}`}>{id.replaceAll("-"," ")} ↗</Link>)}</div>}</div><button>Fork from here <span>↗</span></button></div>
  </div>;
 }
