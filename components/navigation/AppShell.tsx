@@ -11,6 +11,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
  const [switching, setSwitching] = useState(false);
  const router = useRouter();
  const pathname = usePathname();
+ const isWorldMap = /^\/world\/[^/]+\/?$/.test(pathname);
  const switchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
  useEffect(() => () => { if (switchTimer.current) clearTimeout(switchTimer.current); }, []);
  function switchWorld(event:MouseEvent<HTMLAnchorElement>, href:string) {
@@ -20,6 +21,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   setSwitching(true);
   switchTimer.current=setTimeout(()=>{router.push(href);setSwitching(false);setMenu(false)},180);
  }
+ if (isWorldMap) return <div className="map-app-content">{children}</div>;
  return <div className="app-shell">
   <button className="mobile-menu" onClick={() => setMenu(!menu)} aria-label="Toggle navigation">{menu ? <X/> : <Menu/>}</button>
   <aside className={`sidebar ${menu ? "is-visible" : ""}`}>
