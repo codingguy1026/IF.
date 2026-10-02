@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Menu, Plus, Search, X } from "lucide-react";
 import { FormEvent, useMemo, useState } from "react";
 import { timeline, WikiArticle, wikiArticles, World } from "@/lib/data";
+import { BranchTimeline } from "@/components/timeline/BranchTimeline";
 
 type SearchResult = { label: string; meta: string; href?: string };
 
@@ -38,13 +39,13 @@ export function WorldMap({ world }: { world: World }) {
   return <main className="world-map-shell">
     <header className="world-map-header">
       <div className="world-map-identity">
-        <Image src="/brand/if-logo.svg" alt="IF." width={70} height={70} priority />
-        <h1>{world.name} <span>·</span> 2036</h1>
+        <Image src="/brand/if-logo.svg" alt="IF." width={52} height={52} priority />
+        <div><span>ACTIVE WORLD</span><h1>{world.name} <i>/</i> <b>2036</b></h1></div>
       </div>
       <div className="world-search-wrap">
         <label className="world-search">
           <span className="sr-only">세계관 검색</span>
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="연도, 사건, 인물, 장소, 타임라인 검색" />
+          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search years, events, people, places…" />
           <Search aria-hidden="true" />
         </label>
         {query && <div className="world-search-results">
@@ -57,9 +58,7 @@ export function WorldMap({ world }: { world: World }) {
     </header>
 
     <section className="world-map-canvas" aria-label={`${world.name} 연도별 타임라인 지도`}>
-      <div className="map-origin-line" />
-      <div className="map-year map-year-origin"><span>2036</span><i /></div>
-      {years.map((year, index) => <div className="map-year map-year-created" style={{ left: `${Math.min(78, 23 + index * 16)}%` }} key={`${year}-${index}`}><span>{year}</span><i /></div>)}
+      <BranchTimeline worldId={world.id} immersive additionalYears={years} />
     </section>
 
     <aside className={`world-map-toolbar ${toolsOpen ? "is-open" : ""}`} aria-label="지도 도구">
@@ -67,10 +66,10 @@ export function WorldMap({ world }: { world: World }) {
       <button className="toolbar-add" onClick={() => setYearOpen(true)} aria-label="새 연도 타임라인 만들기"><Plus /></button>
     </aside>
     {toolsOpen && <nav className="world-tool-drawer" aria-label="세계관 메뉴">
-      <p>WORLD MENU</p>
-      <Link href={`/world/${world.id}/wiki`}>세계관 기록</Link>
-      <Link href={`/world/${world.id}/wiki/new`}>새 기록 작성</Link>
-      <Link href="/explore">다른 세계관</Link>
+      <p>WORLD / NAVIGATION</p>
+      <Link href={`/world/${world.id}/wiki`}>World archive</Link>
+      <Link href={`/world/${world.id}/wiki/new`}>New record</Link>
+      <Link href="/explore">Explore worlds</Link>
     </nav>}
 
     {yearOpen && <div className="year-dialog-backdrop" onMouseDown={() => setYearOpen(false)}>
