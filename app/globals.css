@@ -274,3 +274,11 @@ button,.button-link,.section-link{transition:color .25s var(--motion-ease),backg
   .is-open .if-atmosphere-grid{opacity:.55;transform:none}
   .is-open .idea-form::after{transform:scaleX(1)}
 }
+
+
+/* Keep the invitation cue hidden after the worldline opens, even on hover. */
+.is-open .brand-stage .click-hint{opacity:0;visibility:hidden}
+.brand-dot-trigger:active{transform:translate(-50%,-50%) scale(.98)}
+@media(max-width:760px){
+  .is-open .word-if{width:min(25vw,130px);height:min(25vw,130px)}
+}
