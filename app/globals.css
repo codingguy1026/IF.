@@ -282,3 +282,25 @@ button,.button-link,.section-link{transition:color .25s var(--motion-ease),backg
 @media(max-width:760px){
   .is-open .word-if{width:min(25vw,130px);height:min(25vw,130px)}
 }
+
+
+/* IF. visual baseline alignment
+   The SVGs have different internal whitespace: WHAT ink=406/1080,
+   IF ink=548/1000, question ink=844/1080. Match optical ink height,
+   then compensate each artwork's ink baseline rather than container center. */
+.brand-stage{width:min(96vw,920px)}
+.brand-stage .word-what,.brand-stage .word-question{
+  transition:width 1.28s cubic-bezier(.19,1,.22,1),
+    height 1.28s cubic-bezier(.19,1,.22,1),
+    opacity .75s ease,
+    transform 1.28s cubic-bezier(.19,1,.22,1);
+}
+.is-open .word-what{width:460px;height:270px;transform:translateY(-7px)}
+.is-open .word-if{width:180px;height:180px;transform:translateX(0)}
+.is-open .word-question{width:230px;height:160px;transform:translateY(-17px)}
+@media(max-width:920px){
+  /* All three pieces shrink by the same ratio and stay on one line. */
+  .is-open .word-what{width:50vw;height:29.35vw;transform:translateY(-.78vw)}
+  .is-open .word-if{width:19.56vw;height:19.56vw}
+  .is-open .word-question{width:25vw;height:17.39vw;transform:translateY(-1.84vw)}
+}
