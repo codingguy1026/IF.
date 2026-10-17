@@ -304,3 +304,37 @@ button,.button-link,.section-link{transition:color .25s var(--motion-ease),backg
   .is-open .word-if{width:19.56vw;height:19.56vw}
   .is-open .word-question{width:25vw;height:17.39vw;transform:translateY(-1.84vw)}
 }
+
+
+/* Liquid Glass v1: restrained smoked glass, preserving IF.'s monochrome identity. */
+body {
+  background-image:
+    radial-gradient(circle at 83% 3%, rgba(216, 255, 99, .055), transparent 32rem),
+    radial-gradient(circle at 12% 70%, rgba(190, 204, 255, .035), transparent 38rem);
+  background-attachment: fixed;
+}
+.app-shell :is(.sidebar, .world-card, .infobox, .event-inspector, .world-map-toolbar, .year-dialog, .world-search-results, .world-tool-drawer) {
+  border-color: rgba(216, 255, 99, .15);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .095), 0 16px 42px rgba(0, 0, 0, .22);
+  -webkit-backdrop-filter: saturate(125%) blur(16px);
+  backdrop-filter: saturate(125%) blur(16px);
+}
+.app-shell :is(.sidebar, .world-card, .infobox, .event-inspector, .world-search-results, .world-tool-drawer) {
+  background-color: rgba(10, 13, 11, .83);
+}
+.app-shell .world-card:hover {
+  background-color: rgba(25, 32, 23, .91);
+}
+@media (max-width: 640px) {
+  .app-shell :is(.sidebar, .world-card, .infobox, .event-inspector, .world-map-toolbar, .year-dialog, .world-search-results, .world-tool-drawer) {
+    -webkit-backdrop-filter: saturate(110%) blur(8px);
+    backdrop-filter: saturate(110%) blur(8px);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  .app-shell :is(.sidebar, .world-card, .infobox, .event-inspector, .world-map-toolbar, .year-dialog, .world-search-results, .world-tool-drawer) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    background-color: #101310;
+  }
+}
