@@ -24,7 +24,7 @@ export function safeNextPath(value: string | null | undefined, fallback = "/prof
 }
 
 export function displayName(user: { email?: string; user_metadata?: Record<string, unknown> }): string {
-  const name = user.user_metadata?.display_name;
+  const name = user.user_metadata?.display_name ?? user.user_metadata?.full_name ?? user.user_metadata?.name;
   if (typeof name === "string" && name.trim()) return name.trim();
   return user.email?.split("@")[0] || "Archivist";
 }
