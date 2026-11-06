@@ -61,7 +61,7 @@ function AccountProfile() {
         <button type="submit" disabled={busy}>SAVE PROFILE ↗</button>
       </form>
       <div className="if-profile-actions">
-        <Link href="/auth/login">Account settings</Link>
+        <Link href="/auth/reset-password">Change password</Link>
         <button type="button" onClick={logout} disabled={busy}>Sign out ↗</button>
       </div>
     </section>
