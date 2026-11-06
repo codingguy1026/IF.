@@ -30,7 +30,7 @@ export function LandingExperience() {
     </div>
     <div id="if-invitation" className="invitation" aria-hidden={!open} inert={!open}>
       <form action="/create" className="idea-form"><label htmlFor="idea" className="sr-only">Your first idea for a world</label><input id="idea" name="idea" placeholder="What if...?" autoComplete="off" /><button aria-label="Begin creating"><ArrowRight size={19}/></button></form>
-      <div className="landing-actions"><Link href="/create">Create a World</Link><Link href="/explore">Explore Worlds</Link></div>
+      <div className="landing-actions"><Link href="/create">Create a World</Link><Link href="/explore">Explore Worlds</Link><Link href="/auth/login">Sign In</Link></div>
     </div>
     <p className="landing-note">An archive of possible histories</p>
   </main>;

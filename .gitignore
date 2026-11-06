@@ -1,3 +1,7 @@
 node_modules/
 .next/
 *.tsbuildinfo
+
+# Never commit IF. credentials
+.env*
+!.env.example
