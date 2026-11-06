@@ -18,6 +18,7 @@ function AuthForm() {
   const [mode, setMode] = useState<Mode>("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmation, setConfirmation] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -49,6 +50,10 @@ function AuthForm() {
       } else if (mode === "signup") {
         if (password.length < 8) {
           setError("비밀번호는 8자 이상으로 설정해 주세요.");
+          return;
+        }
+        if (password !== confirmation) {
+          setError("비밀번호 확인이 일치하지 않습니다.");
           return;
         }
         const { data, error: signUpError } = await client.auth.signUp({
@@ -110,6 +115,7 @@ function AuthForm() {
           {mode === "signup" && <label>DISPLAY NAME<input type="text" autoComplete="nickname" maxLength={40} value={name} onChange={event => setName(event.target.value)} placeholder="Your name" disabled={busy || !configured} /></label>}
           <label>EMAIL ADDRESS<input type="email" autoComplete="email" required value={email} onChange={event => setEmail(event.target.value)} placeholder="you@example.com" disabled={busy || !configured} /></label>
           {mode !== "forgot" && <label>PASSWORD<input type="password" minLength={mode === "signup" ? 8 : undefined} autoComplete={mode === "signup" ? "new-password" : "current-password"} required value={password} onChange={event => setPassword(event.target.value)} placeholder={mode === "signup" ? "8 characters or more" : "Your password"} disabled={busy || !configured} /></label>}
+          {mode === "signup" && <label>CONFIRM PASSWORD<input type="password" autoComplete="new-password" required value={confirmation} onChange={event => setConfirmation(event.target.value)} placeholder="Repeat your password" disabled={busy || !configured} /></label>}
           {mode === "login" && <button type="button" className="if-auth-text-button" onClick={() => switchMode("forgot")}>Forgot password?</button>}
           {error && <div className="if-auth-alert error" role="alert">{error}</div>}
           {message && <div className="if-auth-alert success" role="status">{message}</div>}
