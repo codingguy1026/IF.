@@ -4,9 +4,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { CSSProperties, FormEvent, Suspense, useEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
+import { RequireAuth } from "@/components/auth/RequireAuth";
+import { useAuth } from "@/components/auth/AuthProvider";
 
 function CreateForm() {
   const router=useRouter(), params=useSearchParams();
+  const { user } = useAuth();
   const [step,setStep]=useState(1), [policy,setPolicy]=useState("REVIEW"), [name,setName]=useState(""), [start,setStart]=useState(""), [origin,setOrigin]=useState(false);
   const originTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
   useEffect(()=>()=>{if(originTimer.current)clearTimeout(originTimer.current)},[]);
@@ -15,7 +18,8 @@ function CreateForm() {
     if(step<2){setStep(2);return}
     if(origin)return;
     setOrigin(true);
-    localStorage.setItem("if:last-world",JSON.stringify({name,policy,start}));
+    if (!user) return;
+    localStorage.setItem(`if:last-world:${user.id}`,JSON.stringify({name,policy,start}));
     const duration=window.matchMedia("(prefers-reduced-motion: reduce)").matches?80:1450;
     originTimer.current=setTimeout(()=>router.push("/world/luna-republic"),duration);
   }
@@ -40,4 +44,4 @@ function CreateForm() {
   </main>;
 }
 
-export default function CreatePage(){return <Suspense><CreateForm/></Suspense>}
+export default function CreatePage(){return <RequireAuth next="/create"><Suspense><CreateForm/></Suspense></RequireAuth>;}
