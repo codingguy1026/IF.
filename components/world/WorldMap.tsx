@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Menu, Plus, Search, X } from "lucide-react";
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { timeline, WikiArticle, wikiArticles, World } from "@/lib/data";
 import { BranchTimeline } from "@/components/timeline/BranchTimeline";
 
@@ -14,6 +14,12 @@ export function WorldMap({ world }: { world: World }) {
   const [yearOpen, setYearOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [years, setYears] = useState<string[]>([]);
+  useEffect(() => {
+    try {
+      const stored: unknown = JSON.parse(localStorage.getItem(`if:timeline-years:${world.id}`) ?? "[]");
+      if (Array.isArray(stored)) setYears(stored.filter((year): year is string => typeof year === "string"));
+    } catch { /* Ignore malformed or unavailable local storage. */ }
+  }, [world.id]);
   const articles = useMemo(() => wikiArticles.filter((article) => article.worldId === world.id), [world.id]);
   const results = useMemo<SearchResult[]>(() => {
     const term = query.trim().toLocaleLowerCase();
@@ -32,7 +38,10 @@ export function WorldMap({ world }: { world: World }) {
     const form = new FormData(event.currentTarget);
     const year = String(form.get("year") || "").trim();
     if (!year) return;
-    setYears((current) => [...current, year]);
+    const updated = [...years, year];
+    setYears(updated);
+    try { localStorage.setItem(`if:timeline-years:${world.id}`, JSON.stringify(updated)); }
+    catch { /* The timeline remains available in this tab. */ }
     setYearOpen(false);
   }
 

@@ -338,3 +338,18 @@ body {
     background-color: #101310;
   }
 }
+
+
+/* IF. / Event-based worldline forks */
+.fork-count{color:#555;margin-left:8px}
+.timeline-canvas .fork-path{stroke:var(--acid);stroke-opacity:.65;stroke-width:1.5;stroke-dasharray:4 6}
+.timeline-canvas .fork-node circle{stroke:var(--acid)}
+.fork-origin{margin-top:10px!important;color:#7e8853!important;font:8px "DM Mono",monospace!important;letter-spacing:.05em}
+.event-inspector button{cursor:pointer;color:#dedede;white-space:nowrap}
+.event-inspector button:hover,.event-inspector button:focus-visible{border-color:var(--acid);color:var(--acid)}
+.fork-dialog strong{color:#bbb;font-weight:500}
+.fork-dialog label:not(:first-of-type){margin-top:18px}
+.fork-dialog textarea{display:block;width:100%;min-height:106px;resize:vertical;padding:14px;border:1px solid #303030;background:#0b0b0b;color:#eee;outline:0;font:12px "DM Mono",monospace;line-height:1.5}
+.fork-dialog textarea:focus{border-color:#888}
+.fork-dialog .fork-error{color:#ef8d8d;margin:12px 0;font-size:10px}
+@media(max-width:760px){.fork-count{display:none}.event-inspector{gap:12px}.fork-dialog textarea{min-height:100px}}
