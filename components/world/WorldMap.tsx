@@ -6,6 +6,7 @@ import { Menu, Plus, Search, X } from "lucide-react";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { timeline, WikiArticle, wikiArticles, World } from "@/lib/data";
 import { BranchTimeline } from "@/components/timeline/BranchTimeline";
+import { AccountEntry } from "@/components/auth/AccountEntry";
 
 type SearchResult = { label: string; meta: string; href?: string };
 
@@ -64,6 +65,7 @@ export function WorldMap({ world }: { world: World }) {
             : <p>일치하는 기록이 없습니다.</p>}
         </div>}
       </div>
+      <AccountEntry compact />
     </header>
 
     <section className="world-map-canvas" aria-label={`${world.name} 연도별 타임라인 지도`}>
