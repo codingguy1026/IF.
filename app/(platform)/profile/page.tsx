@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { RequireAuth } from "@/components/auth/RequireAuth";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { displayName } from "@/lib/auth/client";
+import { MyWorlds } from "@/components/world/MyWorlds";
 
 function AccountProfile() {
   const { client, user, signOut } = useAuth();
@@ -65,7 +66,7 @@ function AccountProfile() {
         <button type="button" onClick={logout} disabled={busy}>Sign out ↗</button>
       </div>
     </section>
-    <p className="if-profile-note">Worlds and branches are currently prototype data. Account-linked cloud storage will be added separately.</p>
+    <MyWorlds />
   </main>;
 }
 
