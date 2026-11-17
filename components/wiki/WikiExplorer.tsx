@@ -1,42 +1,80 @@
 "use client";
 
-import { ArrowUpRight, Clock3, FileText, Search, SlidersHorizontal } from "lucide-react";
+import { ArrowUpRight, Clock3, GitBranch, Search, X } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { articleTypes, type WikiArticle } from "@/lib/data";
+import { useState } from "react";
+import { articleTypes, type WikiArticle, type WikiArticleType } from "@/lib/data";
 import { StatusBadge } from "./StatusBadge";
 
 export function WikiExplorer({ worldId, articles }: { worldId: string; articles: WikiArticle[] }) {
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("All");
-  const visible = useMemo(() => articles.filter(article =>
+  const [category, setCategory] = useState<WikiArticleType | "All">("All");
+  const term = query.trim().toLowerCase();
+  const visible = articles.filter(article =>
     (category === "All" || article.type === category) &&
-    `${article.title} ${article.summary} ${article.type}`.toLowerCase().includes(query.toLowerCase())
-  ), [articles, category, query]);
-  const counts = Object.fromEntries(articleTypes.map(type => [type, articles.filter(article => article.type === type).length]));
+    `${article.title} ${article.summary} ${article.type} ${article.branchName}`.toLowerCase().includes(term)
+  );
+  const categories = ["All", ...articleTypes] as const;
 
-  return <>
-    <section className="wiki-search" aria-label="Search this world's wiki">
-      <Search />
-      <input value={query} onChange={event => setQuery(event.target.value)} placeholder="Search people, places, events, ideas…" aria-label="Search wiki" />
-      <span>{visible.length} records</span>
-    </section>
-    <div className="wiki-layout">
-      <aside className="category-rail">
-        <div className="rail-heading"><SlidersHorizontal /> Browse archive</div>
-        {["All", ...articleTypes].map(type => <button className={category === type ? "active" : ""} onClick={() => setCategory(type)} key={type}>
-          <span>{type}</span><b>{type === "All" ? articles.length : counts[type] || 0}</b>
-        </button>)}
+  return (
+    <div className="wiki-index">
+      <aside className="wiki-categories" aria-labelledby="wiki-category-title">
+        <h2 id="wiki-category-title">Categories</h2>
+        <div>
+          {categories.map(type => (
+            <button type="button" aria-pressed={category === type} onClick={() => setCategory(type)} key={type}>
+              <span>{type === "All" ? "All records" : type}</span>
+              <span>{type === "All" ? articles.length : articles.filter(article => article.type === type).length}</span>
+            </button>
+          ))}
+        </div>
       </aside>
-      <section className="article-results" aria-live="polite">
-        <header><div><span>INDEX / {category.toUpperCase()}</span><h2>{category === "All" ? "All records" : category}</h2></div><small>Sorted by recent activity</small></header>
-        {visible.length ? visible.map((article, index) => <Link className="article-row" href={`/world/${worldId}/wiki/${article.id}`} key={article.id}>
-          <span className="article-number">{String(index + 1).padStart(2, "0")}</span>
-          <div className="article-row-main"><div><span className="article-type">{article.type}</span><StatusBadge status={article.status} /></div><h3>{article.title}</h3><p>{article.summary}</p></div>
-          <div className="article-meta"><span><FileText />{article.branchName}</span><span><Clock3 />{article.updated}</span></div>
-          <ArrowUpRight className="row-arrow" />
-        </Link>) : <div className="empty-results"><Search/><h3>No records found</h3><p>Try another phrase or category.</p></div>}
+      <section className="wiki-results" aria-labelledby="wiki-results-title">
+        <div className="wiki-search" role="search">
+          <Search aria-hidden="true" />
+          <input
+            type="search"
+            value={query}
+            onChange={event => setQuery(event.target.value)}
+            placeholder="Search records or worldlines"
+            aria-label="Search wiki"
+          />
+          {query && <button type="button" onClick={() => setQuery("")} aria-label="Clear search"><X aria-hidden="true" /></button>}
+        </div>
+        <div className="wiki-results-heading">
+          <h2 id="wiki-results-title">{category === "All" ? "All records" : category}</h2>
+          <span role="status">{visible.length} {visible.length === 1 ? "record" : "records"}</span>
+        </div>
+        {visible.length > 0 ? (
+          <ul className="wiki-records">
+            {visible.map(article => (
+              <li key={article.id}>
+                <Link className="wiki-row" href={`/world/${worldId}/wiki/${article.id}`}>
+                  <div className="wiki-row-copy">
+                    <span className="wiki-kicker">{article.type}</span>
+                    <h3>{article.title}</h3>
+                    <p>{article.summary}</p>
+                  </div>
+                  <div className="wiki-row-meta">
+                    <span><GitBranch aria-hidden="true" />{article.branchName}</span>
+                    <span><Clock3 aria-hidden="true" />{article.updated}</span>
+                  </div>
+                  <div className="wiki-row-status">
+                    <StatusBadge status={article.status} />
+                    <ArrowUpRight aria-hidden="true" />
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="wiki-empty">
+            <h3>{articles.length ? "No matching records" : "No records yet"}</h3>
+            <p>{articles.length ? "Try another search or category." : "Add the first article to this world’s archive."}</p>
+            {!articles.length && <Link className="wiki-timeline-link" href={`/world/${worldId}/wiki/new`}>New article <ArrowUpRight aria-hidden="true" /></Link>}
+          </div>
+        )}
       </section>
     </div>
-  </>;
+  );
 }
