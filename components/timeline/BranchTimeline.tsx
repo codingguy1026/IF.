@@ -4,25 +4,10 @@ import { Maximize2, Minus, Plus, RotateCcw, X } from "lucide-react";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { timeline } from "@/lib/data";
+import { NewspaperAction } from "@/components/newspaper/NewspaperAction";
+import { eventPath } from "@/lib/newspaper/model";
+import { eventsForWorldline, forkKey, loadBrowserForks, worldlineOptions, type TimelineSelection } from "@/lib/newspaper/worldlines";
 import type { WorldlineFork as Fork } from "@/lib/worlds/storage";
-
-const forkKey = (worldId: string) => `if:worldline-forks:${worldId}`;
-
-function loadForks(worldId: string): Fork[] {
-  try {
-    const stored: unknown = JSON.parse(localStorage.getItem(forkKey(worldId)) ?? "[]");
-    if (!Array.isArray(stored)) return [];
-    return stored.filter((item): item is Fork => (
-      item !== null && typeof item === "object" &&
-      typeof item.id === "string" && item.worldId === worldId &&
-      typeof item.fromEventId === "string" && typeof item.name === "string" &&
-      typeof item.premise === "string" && typeof item.createdAt === "string" &&
-      timeline.some(event => event.id === item.fromEventId)
-    ));
-  } catch {
-    return [];
-  }
-}
 
 export function BranchTimeline({
   worldId = "luna-republic",
@@ -32,6 +17,7 @@ export function BranchTimeline({
   savedForks,
   saveFork,
   originRules,
+  initialSelection,
 }: {
   worldId?: string;
   immersive?: boolean;
@@ -40,12 +26,14 @@ export function BranchTimeline({
   savedForks?: Fork[];
   saveFork?: (fork: Fork) => Promise<Fork>;
   originRules?: string;
+  initialSelection?: TimelineSelection;
 }) {
   const [zoom, setZoom] = useState(1);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const hasDemoEvents = events === timeline;
   const firstEvent = hasDemoEvents ? timeline[2] : events[0];
-  const [selectedId, setSelectedId] = useState(firstEvent.id);
+  const [selectedId, setSelectedId] = useState(initialSelection?.eventId ?? firstEvent.id);
+  const [worldlineId, setWorldlineId] = useState(initialSelection?.worldlineId ?? "main");
   const [forks, setForks] = useState<Fork[]>(() => savedForks ?? []);
   const [selectedForkId, setSelectedForkId] = useState<string | null>(null);
   const [forkOpen, setForkOpen] = useState(false);
@@ -57,11 +45,15 @@ export function BranchTimeline({
   const draftId = useRef<string | null>(null);
 
   useEffect(() => {
-    setForks(savedForks ?? loadForks(worldId));
-    setSelectedForkId(null);
+    try { setForks(savedForks ?? loadBrowserForks(worldId)); }
+    catch { setForks([]); }
   }, [worldId, savedForks]);
 
-  const selected = events.find(event => event.id === selectedId) ?? firstEvent;
+  const lines = worldlineOptions(forks, hasDemoEvents);
+  const resolvedLine = lines.find(line => line.id === worldlineId);
+  const activeLine = resolvedLine ?? { id: worldlineId, name: "Worldline unavailable" };
+  const lineEvents = eventsForWorldline(events, activeLine.id, forks, hasDemoEvents);
+  const selected = lineEvents.find(event => event.id === selectedId) ?? lineEvents.at(-1) ?? firstEvent;
   const eventsById = new Map(events.map(event => [event.id, event]));
   const selectedFork = forks.find(fork => fork.id === selectedForkId);
   const source = selectedFork ? eventsById.get(selectedFork.fromEventId) : null;
@@ -70,8 +62,21 @@ export function BranchTimeline({
   const viewHeight = Math.max(360, 405 + (forks.length - 1) * 90);
 
   function chooseEvent(event: typeof timeline[number]) {
-    setSelectedId(event.id);
+    const nextLine = lineEvents.some(item => item.id === event.id) ? activeLine.id : hasDemoEvents && event.id === "e5" ? "federation" : "main";
+    selectContext(nextLine, event.id);
     setSelectedForkId(null);
+  }
+
+  function selectContext(nextLine: string, eventId: string) {
+    setWorldlineId(nextLine);
+    setSelectedId(eventId);
+    // Keep refresh/back links scoped to the actual selection without remounting the map.
+    if (immersive) window.history.replaceState(null, "", eventPath({ worldId, worldlineId: nextLine, eventId }));
+  }
+
+  function chooseFork(fork: Fork) {
+    selectContext(fork.id, fork.fromEventId);
+    setSelectedForkId(fork.id);
   }
 
   async function createFork(event: FormEvent<HTMLFormElement>) {
@@ -94,7 +99,7 @@ export function BranchTimeline({
       const saved = saveFork ? await saveFork(fork) : fork;
       if (!saveFork) localStorage.setItem(forkKey(worldId), JSON.stringify([...forks, saved]));
       setForks(previous => previous.some(item => item.id === saved.id) ? previous : [...previous, saved]);
-      setSelectedForkId(saved.id);
+      chooseFork(saved);
       setForkOpen(false);
       setName("");
       setPremise("");
@@ -109,7 +114,16 @@ export function BranchTimeline({
 
   return <div className={`timeline-panel ${immersive ? "timeline-panel--immersive" : ""}`}>
     <div className="timeline-head">
-      <div><span className="status-dot" /> MAIN WORLDLINE <span className="fork-count">/ {forks.length} NEW BRANCHES</span></div>
+      <label className="timeline-worldline"><span className="status-dot" /><span className="sr-only">Worldline</span>
+        <select aria-label="Worldline" value={activeLine.id} onChange={event => {
+          const nextEvents = eventsForWorldline(events, event.target.value, forks, hasDemoEvents);
+          selectContext(event.target.value, nextEvents.find(item => item.id === selected.id)?.id ?? nextEvents.at(-1)?.id ?? firstEvent.id);
+          setSelectedForkId(null);
+        }}>
+          {!resolvedLine && <option value={worldlineId} disabled>Worldline unavailable</option>}
+          {lines.map(line => <option key={line.id} value={line.id}>{line.name}</option>)}
+        </select>
+      </label>
       <div className="timeline-tools">
         <button onClick={() => setZoom(v => Math.max(.7, v - .15))} aria-label="Zoom out"><Minus /></button>
         <button onClick={() => setZoom(v => Math.min(1.6, v + .15))} aria-label="Zoom in"><Plus /></button>
@@ -146,7 +160,7 @@ export function BranchTimeline({
             d={`M${origin.x} ${origin.y} C${firstControl} ${origin.y} ${targetX - 65} ${y} ${targetX} ${y}`} />;
         })}
 
-        {events.map(item => <g key={item.id} className={`event-node ${!selectedForkId && selected.id === item.id ? "selected" : ""}`}
+        {events.map(item => <g key={item.id} className={`event-node ${lineEvents.some(event => event.id === item.id) ? "" : "event-node--outside"} ${!selectedForkId && selected.id === item.id ? "selected" : ""}`}
           onClick={event => { event.stopPropagation(); chooseEvent(item); }}
           onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); chooseEvent(item); } }}
           role="button" tabIndex={0} aria-label={`${item.year}: ${item.title}`}>
@@ -167,8 +181,8 @@ export function BranchTimeline({
           const x = Math.max(790, origin.x + 90);
           const y = 350 + index * 90;
           return <g key={fork.id} className={`event-node fork-node newly-created ${selectedForkId === fork.id ? "selected" : ""}`}
-            onClick={event => { event.stopPropagation(); setSelectedForkId(fork.id); }}
-            onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelectedForkId(fork.id); } }}
+            onClick={event => { event.stopPropagation(); chooseFork(fork); }}
+            onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); chooseFork(fork); } }}
             role="button" tabIndex={0} aria-label={`Parallel worldline: ${fork.name}`}>
             <circle cx={x} cy={y} r="9" />
             <text x={x} y={y - 28} textAnchor="middle" className="event-year">ALT / {origin.year}</text>
@@ -177,18 +191,21 @@ export function BranchTimeline({
         })}
       </svg>
     </div>
-    <div className="event-inspector">
+    <div className="event-inspector" id="event-details">
       <div>
-        <span>{selectedFork ? `PARALLEL WORLDLINE / ${source?.year ?? ""}` : selected.year}</span>
-        <h3>{selectedFork ? selectedFork.name : selected.title}</h3>
-        <p>{selectedFork ? selectedFork.premise : selected.text}</p>
+        <span>{activeLine.name} / {selectedFork ? source?.year : selected.year}</span>
+        <h3>{resolvedLine ? selectedFork ? selectedFork.name : selected.title : "Choose a worldline"}</h3>
+        <p>{resolvedLine ? selectedFork ? selectedFork.premise : selected.text : "This worldline may not be available in this browser or account."}</p>
         {!selectedFork && selected.id === "origin" && originRules && <details className="world-rules"><summary>World rules</summary><div>{originRules}</div></details>}
         {selectedFork && <p className="fork-origin">ORIGIN · {source?.title}</p>}
-        {!selectedFork && selected.articleIds.length > 0 && <div className="event-records"><b>LINKED WIKI</b>{selected.articleIds.map(id => <Link key={id} href={`/world/${worldId}/wiki/${id}`}>{id.replaceAll("-", " ")} ↗</Link>)}</div>}
+        {resolvedLine && !selectedFork && selected.articleIds.length > 0 && <div className="event-records"><b>LINKED WIKI</b>{selected.articleIds.map(id => <Link key={id} href={`/world/${worldId}/wiki/${id}`}>{id.replaceAll("-", " ")} ↗</Link>)}</div>}
       </div>
-      {selectedFork
-        ? <button type="button" onClick={() => { if (source) chooseEvent(source); }}>View origin ↗</button>
-        : <button type="button" onClick={() => { setSaveError(""); setForkOpen(true); }}>Fork from here <span>↗</span></button>}
+      {resolvedLine && <div className="event-inspector-actions">
+        <NewspaperAction reference={{ worldId, worldlineId: activeLine.id, eventId: selectedFork ? source?.id ?? selected.id : selected.id }} scope={savedForks ? "account" : "browser"} canCreate={Boolean(savedForks) || forks.some(fork => fork.id === activeLine.id)} />
+        {selectedFork
+          ? <button type="button" onClick={() => { if (source) chooseEvent(source); }}>View event ↗</button>
+          : <button type="button" onClick={() => { setSaveError(""); setForkOpen(true); }}>Fork from here <span>↗</span></button>}
+      </div>}
     </div>
     {forkOpen && <div className="year-dialog-backdrop" onMouseDown={() => { if (!busy) setForkOpen(false); }}>
       <section className="year-dialog fork-dialog" role="dialog" aria-modal="true" aria-labelledby="fork-dialog-title" onMouseDown={event => event.stopPropagation()}>

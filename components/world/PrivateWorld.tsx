@@ -6,10 +6,11 @@ import { RequireAuth } from "@/components/auth/RequireAuth";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { WorldMap } from "@/components/world/WorldMap";
 import { loadWorld } from "@/lib/worlds/storage";
+import type { TimelineSelection } from "@/lib/newspaper/worldlines";
 
 type Workspace = NonNullable<Awaited<ReturnType<typeof loadWorld>>>;
 
-function WorldWorkspace({ id }: { id: string }) {
+function WorldWorkspace({ id, initialSelection }: { id: string; initialSelection?: TimelineSelection }) {
   const { client, user } = useAuth();
   const [workspace, setWorkspace] = useState<Workspace | null>();
   const [error, setError] = useState(false);
@@ -36,14 +37,14 @@ function WorldWorkspace({ id }: { id: string }) {
     <span>IF. / WORLDLINE STORAGE</span><h1>World not found.</h1><Link href="/profile#my-worlds">Return to my worlds ↗</Link>
   </main>;
 
-  return <WorldMap world={workspace.world} workspace={workspace} />;
+  return <WorldMap world={workspace.world} workspace={workspace} initialSelection={initialSelection} />;
 }
 
-function ScopedWorld({ id }: { id: string }) {
+function ScopedWorld({ id, initialSelection }: { id: string; initialSelection?: TimelineSelection }) {
   const { user } = useAuth();
-  return <WorldWorkspace key={`${user?.id}:${id}`} id={id} />;
+  return <WorldWorkspace key={`${user?.id}:${id}`} id={id} initialSelection={initialSelection} />;
 }
 
-export function PrivateWorld({ id }: { id: string }) {
-  return <RequireAuth next={`/world/${id}`}><ScopedWorld id={id} /></RequireAuth>;
+export function PrivateWorld({ id, initialSelection }: { id: string; initialSelection?: TimelineSelection }) {
+  return <RequireAuth next={`/world/${id}`}><ScopedWorld id={id} initialSelection={initialSelection} /></RequireAuth>;
 }

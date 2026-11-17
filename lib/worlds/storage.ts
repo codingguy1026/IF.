@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { World } from "@/lib/data";
+import type { World, timeline } from "@/lib/data";
 
 export type SavedWorld = {
   id: string;
@@ -42,6 +42,16 @@ type WorkspaceRow = SavedWorld & {
 const worldColumns = "id,name,description,start,rules,policy,created_at";
 const forkColumns = "id,world_id,from_year_id,name,premise,created_at";
 export const originEventId = "origin";
+
+export function worldEvents(world: SavedWorld, years: SavedYear[]): typeof timeline {
+  return [
+    { id: originEventId, year: world.start, title: "Point of origin", text: world.description, x: 110, y: 90, important: true, articleIds: [] },
+    ...years.map((entry, index) => ({
+      id: entry.id, year: entry.year, title: "Timeline point", text: `A point in the main worldline of ${world.name}.`,
+      x: 310 + index * 200, y: 90, important: false, articleIds: [],
+    })),
+  ];
+}
 
 function mapFork(row: ForkRow): WorldlineFork {
   return {
