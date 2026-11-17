@@ -38,8 +38,14 @@ Restart the Next.js development server after changing environment variables. **N
 - `/create`: client-side sign-in gate
 - Account status links in navigation and the world view
 
-**Important:** User authentication is real once IF.'s separate Supabase project is configured, but world and branch data are still prototype fixtures / browser-local records. Creating a world does not yet write it to Supabase. Client-side route gates improve the UI, but **they are not backend authorization**. Before storing user-owned worlds in the database, implement owner-based RLS policies and enforce ownership on every data operation.
+## Private worlds and worldlines
+
+Apply the migration in `supabase/migrations/` to the dedicated IF. Supabase project before using the world editor. It creates owner-only tables for worlds, timeline points, and forks. Access is enforced by Row Level Security.
+
+After signing in, use **Create a world** to start a private world. Open it again from **Account → My worlds**. Add timeline points with **+** and select a point to use **Fork from here**. The world, timeline points, and forks follow your account across devices. Contribution preferences are saved for future sharing.
+
+The public sample archive and its existing browser-local forks are still available for exploration. The earlier create form saved a small last-world draft in the browser, with its name, starting date, and contribution preference.
 
 ## Status
 
-The project is a work-in-progress prototype, not a production-ready multi-user service. Do not treat the sample worlds in `lib/data.ts` as private user records.
+IF. is a prototype. Shared worlds and cloud-backed wiki editing are still in development.
