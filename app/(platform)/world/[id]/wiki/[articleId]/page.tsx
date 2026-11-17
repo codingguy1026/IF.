@@ -2,6 +2,8 @@ import { ArrowUpRight, Clock3, GitBranch, Pencil, UserRound } from "lucide-react
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StatusBadge } from "@/components/wiki/StatusBadge";
+import { NewspaperAction } from "@/components/newspaper/NewspaperAction";
+import { eventPath } from "@/lib/newspaper/model";
 import { articleById, articleVersions, timeline, worldById, type WikiArticle } from "@/lib/data";
 import "../wiki.css";
 
@@ -66,7 +68,9 @@ export default async function ArticlePage({ params }: { params: Promise<{ id: st
                 {events.map(event => (
                   <li key={event.id}>
                     <time>{event.year}</time>
-                    <div><h3>{event.title}</h3><p>{event.text}</p></div>
+                    <div><h3><Link href={eventPath({ worldId: id, worldlineId: article.branchId, eventId: event.id })}>{event.title}</Link></h3><p>{event.text}</p>
+                      <NewspaperAction reference={{ worldId: id, worldlineId: article.branchId, eventId: event.id }} scope="browser" />
+                    </div>
                   </li>
                 ))}
               </ul>

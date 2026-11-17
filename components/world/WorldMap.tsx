@@ -8,13 +8,14 @@ import { timeline, WikiArticle, wikiArticles, World } from "@/lib/data";
 import { BranchTimeline } from "@/components/timeline/BranchTimeline";
 import { AccountEntry } from "@/components/auth/AccountEntry";
 import { useAuth } from "@/components/auth/AuthProvider";
-import { originEventId, saveWorldFork, saveYear, type SavedWorld, type SavedYear, type WorldlineFork } from "@/lib/worlds/storage";
+import { saveWorldFork, saveYear, worldEvents, type SavedWorld, type SavedYear, type WorldlineFork } from "@/lib/worlds/storage";
+import type { TimelineSelection } from "@/lib/newspaper/worldlines";
 
 type SearchResult = { label: string; meta: string; href?: string };
 
 type Workspace = { world: SavedWorld; years: SavedYear[]; forks: WorldlineFork[] };
 
-export function WorldMap({ world, workspace }: { world: Pick<World, "id" | "name">; workspace?: Workspace }) {
+export function WorldMap({ world, workspace, initialSelection }: { world: Pick<World, "id" | "name">; workspace?: Workspace; initialSelection?: TimelineSelection }) {
   const { client } = useAuth();
   const [toolsOpen, setToolsOpen] = useState(false);
   const [yearOpen, setYearOpen] = useState(false);
@@ -33,14 +34,7 @@ export function WorldMap({ world, workspace }: { world: Pick<World, "id" | "name
   }, [world.id, workspace]);
   const events = useMemo(() => {
     if (!workspace) return timeline;
-    const saved = workspace.world;
-    return [
-      { id: originEventId, year: saved.start, title: "Point of origin", text: saved.description, x: 110, y: 90, important: true, articleIds: [] },
-      ...savedYears.map((entry, index) => ({
-        id: entry.id, year: entry.year, title: "Timeline point", text: `A point in the main worldline of ${saved.name}.`,
-        x: 310 + index * 200, y: 90, important: false, articleIds: [],
-      })),
-    ];
+    return worldEvents(workspace.world, savedYears);
   }, [workspace, savedYears]);
   const articles = useMemo(() => wikiArticles.filter((article) => article.worldId === world.id), [world.id]);
   const results = useMemo<SearchResult[]>(() => {
@@ -115,6 +109,7 @@ export function WorldMap({ world, workspace }: { world: Pick<World, "id" | "name
       <BranchTimeline
         worldId={world.id} immersive additionalYears={years} events={events}
         savedForks={workspace?.forks} originRules={workspace?.world.rules}
+        initialSelection={initialSelection}
         saveFork={workspace && client ? fork => saveWorldFork(client, fork) : undefined}
       />
     </section>
